@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getCustomRepository } from 'typeorm';
 import { SurveysUsersRepository } from '../repositories/SurveysUsersRepository';
+import { answersSchema } from '../validators/yupSchemas';
 
 class AnswerController {
 
@@ -9,6 +10,15 @@ class AnswerController {
   async execute(request: Request, response: Response) {
     const { value } = request.params;
     const { u } = request.query;
+
+    try {
+      await answersSchema.validate({ value, u }, {
+        abortEarly: false,
+      });
+    } catch (error) {
+        console.log(error);
+        return response.status(400).json({error});
+    }
 
     const surveysUsersRepository = getCustomRepository(SurveysUsersRepository);
 

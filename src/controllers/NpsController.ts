@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getCustomRepository, IsNull, Not } from 'typeorm';
 import { SurveysUsersRepository } from '../repositories/SurveysUsersRepository';
+import { npsSchema } from '../validators/yupSchemas';
 
 class NpsController {
   /**
@@ -12,6 +13,15 @@ class NpsController {
 
   async execute(request: Request, response: Response) {
     const { survey_id } = request.params;
+
+    try {
+      await npsSchema.validate(request.params, {
+        abortEarly: false,
+      });
+    } catch (error) {
+        console.log(error);
+        return response.status(400).json({error});
+    }
 
     const surveysUsersRepository = getCustomRepository(SurveysUsersRepository);
 

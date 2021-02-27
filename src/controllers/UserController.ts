@@ -1,11 +1,22 @@
 import { Request, Response } from 'express';
 import { getCustomRepository } from 'typeorm';
 import { UsersRepository } from '../repositories/UsersRepository';
+import { userSchema } from '../validators/yupSchemas';
+
 
 class UserController {
   async create(request: Request, response: Response) {
 
     const { name, email } = request.body;
+
+    try {
+      await userSchema.validate(request.body, {
+        abortEarly: false,
+      });
+    } catch (error) {
+        console.log(error);
+        return response.status(400).json({error});
+    }
 
     const usersRepository = getCustomRepository(UsersRepository);
 

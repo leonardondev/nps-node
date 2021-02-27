@@ -3,12 +3,22 @@ import { getCustomRepository } from 'typeorm';
 import { SurveysRepository } from '../repositories/SurveysRepository';
 import { SurveysUsersRepository } from '../repositories/SurveysUsersRepository';
 import { UsersRepository } from '../repositories/UsersRepository';
+import { sendMailSchema } from '../validators/yupSchemas';
 import SendMailService from '../services/SendMailService';
 import path from 'path';
 
 class SendMailController {
   async execute(request: Request, response: Response) {
     const {email, survey_id } = request.body;
+
+    try {
+      await sendMailSchema.validate(request.body, {
+        abortEarly: false,
+      });
+    } catch (error) {
+        console.log(error);
+        return response.status(400).json({error});
+    }
 
     const usersRepository = getCustomRepository(UsersRepository);
     const surveysRepository = getCustomRepository(SurveysRepository);
